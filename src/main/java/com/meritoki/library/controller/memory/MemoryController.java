@@ -17,7 +17,9 @@ package com.meritoki.library.controller.memory;
 
 import java.util.logging.Logger;
 
-public class MemoryController {
+import com.meritoki.library.controller.Controller;
+
+public class MemoryController extends Controller {
 	
 	protected static Logger logger = Logger.getLogger(MemoryController.class.getName());
 

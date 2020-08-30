@@ -17,7 +17,9 @@ package com.meritoki.library.controller.time;
 
 import java.util.logging.Logger;
 
-public class TimeController {
+import com.meritoki.library.controller.Controller;
+
+public class TimeController extends Controller {
 	
 	protected static Logger logger = Logger.getLogger(TimeController.class.getName());
 	public static long startTime;

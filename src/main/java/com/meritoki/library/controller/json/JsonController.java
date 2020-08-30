@@ -25,8 +25,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.meritoki.library.controller.Controller;
 
-public class JsonController {
+public class JsonController extends Controller {
 	protected static Logger logger = Logger.getLogger(JsonController.class.getName());
 	public static <T> Object getObject(String string, TypeReference<List<T>> typeReference) {
 		logger.fine("getObject(" + string + ", " + typeReference + ")");

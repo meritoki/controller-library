@@ -79,8 +79,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.meritoki.library.controller.Controller;
 
-public class NodeController {
+public class NodeController extends Controller{
 	protected static Logger logger = Logger.getLogger(NodeController.class.getName());
 
 	public static void main(String[] args) {
