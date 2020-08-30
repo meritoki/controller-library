@@ -20,7 +20,9 @@ import java.util.logging.Logger;
 
 import org.mindrot.jbcrypt.BCrypt;
 
-public class SecurityController {
+import com.meritoki.library.controller.Controller;
+
+public class SecurityController extends Controller {
 	protected static Logger logger = Logger.getLogger(SecurityController.class.getName());
     private final int logRounds;
 
