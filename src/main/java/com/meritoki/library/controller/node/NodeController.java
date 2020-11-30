@@ -223,7 +223,7 @@ public class NodeController extends Controller {
 	
 
 	public static void savePropertiesXML(Properties properties, String filePath, String fileName, String comment) {
-		logger.info("propertiesStoreToXML(" + properties + ", " + filePath +", " + fileName + ", " + comment + ")");
+		logger.fine("savePropertiesStoreToXML(" + properties + ", " + filePath +", " + fileName + ", " + comment + ")");
 		OutputStream outputStream = null;
 		try {
 			outputStream = new FileOutputStream(filePath + getSeperator() + fileName);
@@ -240,9 +240,7 @@ public class NodeController extends Controller {
 	}
 	
 	public static boolean savePropertiesXML(Properties properties, String fileName, String comment) {
-
-			logger.info("propertiesStoreToXML(" + properties + ", " + fileName + ", " + comment + ")");
-		
+		logger.fine("propertiesStoreToXML(" + properties + ", " + fileName + ", " + comment + ")");
 		boolean success = false;
 		if (NodeController.newFile(fileName)) {
 			Properties sortedProperties = new Properties() {
@@ -303,7 +301,7 @@ public class NodeController extends Controller {
 
 	@JsonIgnore
 	public static void saveJson(File file, Object object) {
-		logger.info("saveJson(" + file.getAbsolutePath() + ","+object+")");
+		logger.info("saveJson(" + file.getAbsolutePath() + ","+Boolean.valueOf(object!=null)+")");
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 		try {
