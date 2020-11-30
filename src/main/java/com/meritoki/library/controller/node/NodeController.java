@@ -405,7 +405,7 @@ public class NodeController extends Controller {
 			process = processBuilder.start();
 			if (!process.waitFor(timeout, TimeUnit.SECONDS)) {
 				process.destroy();
-				logger.info("executeCommand(...) exitValue=" + process.exitValue());
+				logger.info("executeCommand(...) processs.exitValue=" + process.exitValue());
 			}
 			output = (FileUtils.readFileToString(outputFile, "UTF8"));
 			error = (FileUtils.readFileToString(errorFile, "UTF8"));
@@ -423,7 +423,7 @@ public class NodeController extends Controller {
 			logger.severe("executeCommand(...) Exception " + e.getMessage());
 			throw new Exception("process timed out");
 		} finally {
-			logger.info("executeCommand(...) process.exitValue=" + process.exitValue());
+			logger.fine("executeCommand(...) process.exitValue=" + process.exitValue());
 			exit.value = process.exitValue();
 		}
 		exit.list = stringList;
