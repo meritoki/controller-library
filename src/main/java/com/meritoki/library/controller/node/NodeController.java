@@ -295,7 +295,7 @@ public class NodeController extends Controller {
 	
 	
 	public static void savePng(String filePath, String fileName, BufferedImage bufferedImage) throws Exception {
-		saveJpg(new File(filePath + getSeperator() + fileName), bufferedImage);
+		savePng(new File(filePath + getSeperator() + fileName), bufferedImage);
 	}
 
 	@JsonIgnore
