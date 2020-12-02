@@ -20,6 +20,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -37,6 +38,7 @@ import java.nio.file.FileSystems;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -81,7 +83,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.meritoki.library.controller.Controller;
 
-public class NodeController extends Controller{
+public class NodeController extends Controller {
 	protected static Logger logger = Logger.getLogger(NodeController.class.getName());
 
 	public static void main(String[] args) {
@@ -149,7 +151,7 @@ public class NodeController extends Controller{
 
 	@JsonIgnore
 	public static Object openJson(java.io.File file, Class className) {
-		logger.fine("openJson(" + file + ", " + className + ")");
+		logger.info("openJson(" + file + ", " + className + ")");
 		Object object = null;
 		ObjectMapper mapper = new ObjectMapper();
 		try {
@@ -221,6 +223,7 @@ public class NodeController extends Controller{
 	
 
 	public static void savePropertiesXML(Properties properties, String filePath, String fileName, String comment) {
+		logger.fine("savePropertiesStoreToXML(" + properties + ", " + filePath +", " + fileName + ", " + comment + ")");
 		OutputStream outputStream = null;
 		try {
 			outputStream = new FileOutputStream(filePath + getSeperator() + fileName);
@@ -229,13 +232,15 @@ public class NodeController extends Controller{
 			logger.severe("FileNotFoundExcetion " + e.getMessage());
 		} catch (IOException e) {
 			logger.severe("IOException " + e.getMessage());
-		}
+		} 
+//		finally {
+//			outputStream.close();
+//		}
+		
 	}
 	
 	public static boolean savePropertiesXML(Properties properties, String fileName, String comment) {
-
-			logger.finest("propertiesStoreToXML(" + properties + ", " + fileName + ", " + comment + ")");
-		
+		logger.fine("propertiesStoreToXML(" + properties + ", " + fileName + ", " + comment + ")");
 		boolean success = false;
 		if (NodeController.newFile(fileName)) {
 			Properties sortedProperties = new Properties() {
@@ -290,13 +295,13 @@ public class NodeController extends Controller{
 
 	@JsonIgnore
 	public static void saveJson(String path, String name, Object object) {
-		logger.fine("saveJson(" + path + "," + name + ", object)");
+//		logger.info("saveJson(" + path + "," + name + ", object)");
 		saveJson(new java.io.File(path + getSeperator() + name), object);
 	}
 
 	@JsonIgnore
 	public static void saveJson(File file, Object object) {
-		logger.fine("saveJson(" + file.getAbsolutePath() + ",object)");
+		logger.info("saveJson(" + file.getAbsolutePath() + ","+Boolean.valueOf(object!=null)+")");
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 		try {
@@ -354,86 +359,7 @@ public class NodeController extends Controller{
 		}
 	}
 	
-	public static void saveCSV(String name, int[][] matrix) throws IOException {
-		FileWriter writer = new FileWriter(new File(name + ".csv"));
-
-		for (int i = 0; i < matrix.length; i++) {
-			writer.write(matrix[i][0] + "");
-			for (int j = 1; j < matrix[i].length; j++) {
-				writer.write("," + matrix[i][j]);
-			}
-			writer.write("\n");
-		}
-		writer.flush();
-		writer.close();
-		System.out.println(name + ".csv file has been generated.");
-	}
-
-	public static void saveCSV(String name, double[][] matrix) throws IOException {
-		FileWriter writer = new FileWriter(new File(name + ".csv"));
-
-		for (int i = 0; i < matrix.length; i++) {
-			writer.write(matrix[i][0] + "");
-			for (int j = 1; j < matrix[i].length; j++) {
-				writer.write("," + matrix[i][j]);
-			}
-			writer.write("\n");
-		}
-		writer.flush();
-		writer.close();
-		System.out.println(name + ".csv file has been generated.");
-	}
-
-	public static void saveCSV(String name, String[][] matrix) throws IOException {
-		FileWriter writer = new FileWriter(new File(name + ".csv"));
-
-		for (int i = 0; i < matrix.length; i++) {
-			writer.write(matrix[i][0] + "");
-			for (int j = 1; j < matrix[i].length; j++) {
-				writer.write("," + matrix[i][j]);
-			}
-			writer.write("\n");
-		}
-		writer.flush();
-		writer.close();
-		System.out.println(name + ".csv file has been generated.");
-	}
-
-	public static void saveCSV(String name, int[] matrix) throws IOException {
-		FileWriter writer = new FileWriter(new File(name + ".csv"));
-
-		writer.write(matrix[0] + "");
-		for (int i = 1; i < matrix.length; i++) {
-			writer.write("," + matrix[i]);
-		}
-		writer.flush();
-		writer.close();
-		System.out.println(name + ".csv file has been generated.");
-	}
-
-	public static void saveCSV(String name, double[] matrix) throws IOException {
-		FileWriter writer = new FileWriter(new File(name + ".csv"));
-
-		writer.write(matrix[0] + "");
-		for (int i = 1; i < matrix.length; i++) {
-			writer.write("," + matrix[i]);
-		}
-		writer.flush();
-		writer.close();
-		System.out.println(name + ".csv file has been generated.");
-	}
-
-	public static void saveCSV(String name, String[] matrix) throws IOException {
-		FileWriter writer = new FileWriter(new File(name + ".csv"));
-
-		writer.write(matrix[0] + "");
-		for (int i = 1; i < matrix.length; i++) {
-			writer.write("," + matrix[i]);
-		}
-		writer.flush();
-		writer.close();
-		System.out.println(name + ".csv file has been generated.");
-	}
+	
 	
 	public static void savePython(String fileName, String content) {
 		try (PrintWriter out = new PrintWriter(fileName)) {
@@ -445,13 +371,14 @@ public class NodeController extends Controller{
 	}
 
 	@JsonIgnore
-	public static List<String> executeCommand(String command) throws Exception {
+	public static Exit executeCommand(String command) throws Exception {
 		return executeCommand(command, 120);
 	}
 
 	@JsonIgnore
-	public static List<String> executeCommand(String command, int timeout) throws Exception {
+	public static Exit executeCommand(String command, int timeout) throws Exception {
 		logger.info("executeCommand(" + command + ", " + timeout + ")");
+		Exit exit = new Exit();
 		UUID uuid = UUID.randomUUID();
 		File processDirectory = new File("process");
 		if (!processDirectory.exists()) {
@@ -464,7 +391,8 @@ public class NodeController extends Controller{
 			processBuilder = new ProcessBuilder("bash", "-c", command).redirectError(errorFile)
 					.redirectOutput(outputFile);
 		} else if (isWindows()) {
-			processBuilder = new ProcessBuilder("CMD", "/C", command).redirectError(errorFile)
+			logger.info("executeCommand(...) windows");
+			processBuilder = new ProcessBuilder("cmd.exe", "/c", command).redirectError(errorFile)
 					.redirectOutput(outputFile);
 		}
 
@@ -477,7 +405,7 @@ public class NodeController extends Controller{
 			process = processBuilder.start();
 			if (!process.waitFor(timeout, TimeUnit.SECONDS)) {
 				process.destroy();
-				logger.info("executeCommand(...) exitValue=" + process.exitValue());
+				logger.info("executeCommand(...) processs.exitValue=" + process.exitValue());
 			}
 			output = (FileUtils.readFileToString(outputFile, "UTF8"));
 			error = (FileUtils.readFileToString(errorFile, "UTF8"));
@@ -495,13 +423,11 @@ public class NodeController extends Controller{
 			logger.severe("executeCommand(...) Exception " + e.getMessage());
 			throw new Exception("process timed out");
 		} finally {
-			logger.info("executeCommand(...) process.exitValue=" + process.exitValue());
-			if (outputFile.exists() || errorFile.exists()) {
-				outputFile.delete();
-				errorFile.delete();
-			}
+			logger.fine("executeCommand(...) process.exitValue=" + process.exitValue());
+			exit.value = process.exitValue();
 		}
-		return stringList;
+		exit.list = stringList;
+		return exit;
 	}
 
 	public void copyDirectory(File sourceDirectory, File destinationDirectory) {
@@ -751,4 +677,26 @@ public class NodeController extends Controller{
 			combined[i] = (i < one.length) ? one[i] : two[i - one.length];
 		return combined;
 	}
+	
+	public static String getBufferedImageChecksum(BufferedImage bufferedImage) throws Exception {
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		ImageIO.write(bufferedImage, "png", outputStream);
+		byte[] data = outputStream.toByteArray();
+		System.out.println("Start MD5 Digest");
+		MessageDigest md = MessageDigest.getInstance("MD5");
+		md.update(data);
+		byte[] hash = md.digest();
+		return returnHex(hash);
+	}
+
+	// Below method of converting Byte Array to hex
+	// Can be found at: http://www.rgagnon.com/javadetails/java-0596.html
+	static String returnHex(byte[] inBytes) throws Exception {
+		String hexString = "";
+		for (int i = 0; i < inBytes.length; i++) { // for loop ID:1
+			hexString += Integer.toString((inBytes[i] & 0xff) + 0x100, 16).substring(1);
+		} // Belongs to for loop ID:1
+		return hexString;
+	}
+
 }
