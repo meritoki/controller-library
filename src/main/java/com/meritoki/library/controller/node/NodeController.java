@@ -292,6 +292,17 @@ public class NodeController extends Controller {
 		logger.info("saveJpg(" + file + ", " + bufferedImage + ")");
 		ImageIO.write(bufferedImage, "jpg", file);
 	}
+	
+	
+	public static void savePng(String filePath, String fileName, BufferedImage bufferedImage) throws Exception {
+		saveJpg(new File(filePath + getSeperator() + fileName), bufferedImage);
+	}
+
+	@JsonIgnore
+	public static void savePng(File file, BufferedImage bufferedImage) throws Exception {
+		logger.info("savePng(" + file + ", " + bufferedImage + ")");
+		ImageIO.write(bufferedImage, "png", file);
+	}
 
 	@JsonIgnore
 	public static void saveJson(String path, String name, Object object) {
