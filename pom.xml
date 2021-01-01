@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.meritoki.library</groupId>
 	<artifactId>controller</artifactId>
-	<version>0.2.202008</version>
+	<version>0.3.202012</version>
 	<name>controller-library</name>
 	<description>Controller Library is a set of controllers that can be used across projects</description>
 	<properties>
