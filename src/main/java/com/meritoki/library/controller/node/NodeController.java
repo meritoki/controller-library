@@ -313,6 +313,7 @@ public class NodeController extends Controller {
 	@JsonIgnore
 	public static void saveJson(File file, Object object) {
 		logger.info("saveJson(" + file.getAbsolutePath() + ","+Boolean.valueOf(object!=null)+")");
+		file.getParentFile().mkdirs();
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 		try {
@@ -398,14 +399,14 @@ public class NodeController extends Controller {
 		File outputFile = new File(processDirectory + getSeperator() + "output-" + uuid.toString());
 		File errorFile = new File(processDirectory + getSeperator() + "error-" + uuid.toString());
 		ProcessBuilder processBuilder = null;
-		if (isLinux()) {
+		if (isLinux() || isMac()) {
 			processBuilder = new ProcessBuilder("bash", "-c", command).redirectError(errorFile)
 					.redirectOutput(outputFile);
 		} else if (isWindows()) {
 			logger.info("executeCommand(...) windows");
 			processBuilder = new ProcessBuilder("cmd.exe", "/c", command).redirectError(errorFile)
 					.redirectOutput(outputFile);
-		}
+		} 
 
 		Process process = null;
 		String output = null;
