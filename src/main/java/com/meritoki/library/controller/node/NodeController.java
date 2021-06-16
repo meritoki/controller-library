@@ -141,10 +141,12 @@ public class NodeController extends Controller {
 
 	public static BufferedImage openBufferedImage(java.io.File file) {
 		BufferedImage bufferedImage = null;
-		try {
-			bufferedImage = ImageIO.read(file);
-		} catch (IOException ex) {
-			logger.severe("IOException " + ex.getMessage());
+		if(file != null) {
+			try {
+				bufferedImage = ImageIO.read(file);
+			} catch (IOException ex) {
+				logger.severe("IOException " + ex.getMessage());
+			}
 		}
 		return bufferedImage;
 	}
