@@ -353,14 +353,14 @@ public class NodeController extends Controller {
 	}
 
 	@JsonIgnore
-	public static void saveCsv(String filePath, String fileName, Object object) {
-		logger.info("saveCsv(" + filePath + ", " + fileName + ", object)");
-		saveCsv(new File(filePath + getSeperator() + fileName), object);
+	public static void saveText(String filePath, String fileName, Object object) {
+		logger.info("saveText(" + filePath + ", " + fileName + ", object)");
+		saveText(new File(filePath + getSeperator() + fileName), object);
 	}
 
 	@JsonIgnore
-	public static void saveCsv(File file, Object object) {
-		logger.info("saveCsv(" + file + ", object)");
+	public static void saveText(File file, Object object) {
+		logger.info("saveText(" + file + ", object)");
 		try (PrintWriter writer = new PrintWriter(file)) {
 			if (object instanceof StringBuilder)
 				writer.write(((StringBuilder) object).toString());
