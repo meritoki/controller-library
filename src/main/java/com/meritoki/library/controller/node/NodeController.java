@@ -153,7 +153,7 @@ public class NodeController extends Controller {
 
 	@JsonIgnore
 	public static Object openJson(java.io.File file, Class className) {
-		logger.info("openJson(" + file + ", " + className + ")");
+		logger.fine("openJson(" + file + ", " + className + ")");
 		Object object = null;
 		ObjectMapper mapper = new ObjectMapper();
 		try {
@@ -204,7 +204,7 @@ public class NodeController extends Controller {
 	
 
 	public static Properties openPropertiesXML(InputStream inputStream) {
-		logger.info("openPropertiesXML(" + inputStream + ")");
+		logger.fine("openPropertiesXML(" + inputStream + ")");
 		Properties properties = null;
 		if (inputStream != null) {
 			try {
@@ -297,12 +297,19 @@ public class NodeController extends Controller {
 	
 	
 	public static void savePng(String filePath, String fileName, BufferedImage bufferedImage) throws Exception {
-		savePng(new File(filePath + getSeperator() + fileName), bufferedImage);
+		File file = new File(filePath + getSeperator() + fileName);
+		savePng(file, bufferedImage);
 	}
 
+	/**
+	 * If not working, check file name, may not be valid and save fails
+	 * @param file
+	 * @param bufferedImage
+	 * @throws Exception
+	 */
 	@JsonIgnore
 	public static void savePng(File file, BufferedImage bufferedImage) throws Exception {
-		logger.info("savePng(" + file + ", " + bufferedImage + ")");
+//		logger.info("savePng(" + file + ", " + bufferedImage + ")");
 		ImageIO.write(bufferedImage, "png", file);
 	}
 
@@ -314,7 +321,7 @@ public class NodeController extends Controller {
 
 	@JsonIgnore
 	public static void saveJson(File file, Object object) {
-		logger.info("saveJson(" + file.getAbsolutePath() + ","+Boolean.valueOf(object!=null)+")");
+//		logger.info("saveJson(" + file.getAbsolutePath() + ","+Boolean.valueOf(object!=null)+")");
 		file.getParentFile().mkdirs();
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
@@ -402,45 +409,47 @@ public class NodeController extends Controller {
 		File errorFile = new File(processDirectory + getSeperator() + "error-" + uuid.toString());
 		ProcessBuilder processBuilder = null;
 		if (isLinux() || isMac()) {
+			logger.info("executeCommand("+ command + ", " + timeout + ") linux & mac");
 			processBuilder = new ProcessBuilder("bash", "-c", command).redirectError(errorFile)
 					.redirectOutput(outputFile);
 		} else if (isWindows()) {
-			logger.info("executeCommand(...) windows");
+			logger.info("executeCommand("+ command + ", " + timeout + ") windows");
 			processBuilder = new ProcessBuilder("cmd.exe", "/c", command).redirectError(errorFile)
 					.redirectOutput(outputFile);
 		} 
-
 		Process process = null;
 		String output = null;
 		String error = null;
-		List<String> stringList = new ArrayList<>();
 		String string;
 		try {
 			process = processBuilder.start();
 			if (!process.waitFor(timeout, TimeUnit.SECONDS)) {
 				process.destroy();
-				logger.info("executeCommand(...) processs.exitValue=" + process.exitValue());
+				logger.info("executeCommand("+ command + ", " + timeout + ") processs.exitValue=" + process.exitValue());
 			}
 			output = (FileUtils.readFileToString(outputFile, "UTF8"));
 			error = (FileUtils.readFileToString(errorFile, "UTF8"));
 			if (error != null && !error.equals("")) {
-				string = "error";
-				stringList.add(string);
-			} else if (output != null && !output.equals("")) {
+				string = error;
+				String[] stringArray = string.split("\n");
+				for (String s : stringArray) {
+					exit.error.add(s);
+				}
+			} 
+			if (output != null && !output.equals("")) {
 				string = output;
 				String[] stringArray = string.split("\n");
 				for (String s : stringArray) {
-					stringList.add(s);
+					exit.list.add(s);
 				}
 			}
 		} catch (Exception e) {
-			logger.severe("executeCommand(...) Exception " + e.getMessage());
-			throw new Exception("process timed out");
+			logger.severe("executeCommand("+ command + ", " + timeout + ") Exception: " + e.getMessage());
+			throw new Exception("executeCommand("+ command + ", " + timeout + ") Exception: " + e.getMessage());
 		} finally {
 			logger.fine("executeCommand(...) process.exitValue=" + process.exitValue());
 			exit.value = process.exitValue();
 		}
-		exit.list = stringList;
 		return exit;
 	}
 
