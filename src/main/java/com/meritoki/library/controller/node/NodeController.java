@@ -274,7 +274,7 @@ public class NodeController extends Controller {
 		List<String[]> stringArrayList = new ArrayList<>();
 		try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
 			while ((line = br.readLine()) != null) {
-				logger.info(line);
+//				logger.info(line);
 				String[] array = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");// ",");
 				stringArrayList.add(array);
 			}
