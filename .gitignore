@@ -5,3 +5,5 @@ target/
 bin/
 archive/
 .externalToolBuilders/
+logs/
+process/
