@@ -3,3 +3,7 @@ target/
 .project
 .classpath
 bin/
+archive/
+.externalToolBuilders/
+logs/
+process/

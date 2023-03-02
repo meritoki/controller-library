@@ -54,7 +54,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -70,8 +69,8 @@ import javax.imageio.ImageIO;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-//import org.apache.pdfbox.pdmodel.PDDocument;
-//import org.apache.pdfbox.pdmodel.PDPage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -84,7 +83,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.meritoki.library.controller.Controller;
 
 public class NodeController extends Controller {
-	protected static Logger logger = Logger.getLogger(NodeController.class.getName());
+	protected static Logger logger = LoggerFactory.getLogger(NodeController.class.getName());
 
 	public static void main(String[] args) {
 		System.out.println(getOperatingSystem());
@@ -107,7 +106,7 @@ public class NodeController extends Controller {
 		try {
 			hostAddress = InetAddress.getLocalHost().getHostAddress();
 		} catch (UnknownHostException e) {
-			logger.warning("getHostAddress() UnknownHostException");
+			logger.warn("getHostAddress() UnknownHostException");
 		}
 		return hostAddress;
 	}
@@ -117,7 +116,7 @@ public class NodeController extends Controller {
 		try {
 			hostName = InetAddress.getLocalHost().getHostName();
 		} catch (UnknownHostException e) {
-			logger.warning("getHostName() UnknownHostException");
+			logger.warn("getHostName() UnknownHostException");
 		}
 		return hostName;
 	}
@@ -141,43 +140,45 @@ public class NodeController extends Controller {
 
 	public static BufferedImage openBufferedImage(java.io.File file) {
 		BufferedImage bufferedImage = null;
-		try {
-			bufferedImage = ImageIO.read(file);
-		} catch (IOException ex) {
-			logger.severe("IOException " + ex.getMessage());
+		if(file != null) {
+			try {
+				bufferedImage = ImageIO.read(file);
+			} catch (IOException ex) {
+				logger.error("IOException " + ex.getMessage());
+			}
 		}
 		return bufferedImage;
 	}
 
 	@JsonIgnore
 	public static Object openJson(java.io.File file, Class className) {
-		logger.info("openJson(" + file + ", " + className + ")");
+		//logger.debug("openJson(" + file + ", " + className + ")");
 		Object object = null;
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			object = mapper.readValue(file, className);
 		} catch (JsonGenerationException e) {
-			logger.severe(e.getMessage());
+			logger.error(e.getMessage());
 		} catch (JsonMappingException e) {
-			logger.severe(e.getMessage());
+			logger.error(e.getMessage());
 		} catch (IOException e) {
-			logger.severe(e.getMessage());
+			logger.error(e.getMessage());
 		}
 		return object;
 	}
 
 	public static <T> Object openJson(File file, TypeReference<List<T>> typeReference) {
-		logger.fine("openJson(" + file + ", " + typeReference + ")");
+		//logger.debug("openJson(" + file + ", " + typeReference + ")");
 		Object object = null;
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			object = mapper.readValue(file, typeReference);
 		} catch (JsonGenerationException e) {
-			logger.severe(e.getMessage());
+			logger.error(e.getMessage());
 		} catch (JsonMappingException e) {
-			logger.severe(e.getMessage());
+			logger.error(e.getMessage());
 		} catch (IOException e) {
-			logger.severe(e.getMessage());
+			logger.error(e.getMessage());
 		}
 		return object;
 	}
@@ -193,16 +194,16 @@ public class NodeController extends Controller {
 			properties.loadFromXML(fileInputStream);
 			fileInputStream.close();
 		} catch (FileNotFoundException e) {
-			logger.severe("FileNotFoundExcetion " + e.getMessage());
+			logger.error("FileNotFoundExcetion " + e.getMessage());
 		} catch (IOException e) {
-			logger.severe("IOException " + e.getMessage());
+			logger.error("IOException " + e.getMessage());
 		}
 		return properties;
 	}
 	
 
 	public static Properties openPropertiesXML(InputStream inputStream) {
-		logger.info("openPropertiesXML(" + inputStream + ")");
+		//logger.debug("openPropertiesXML(" + inputStream + ")");
 		Properties properties = null;
 		if (inputStream != null) {
 			try {
@@ -210,10 +211,10 @@ public class NodeController extends Controller {
 				properties.loadFromXML(inputStream);
 			} catch (InvalidPropertiesFormatException e) {
 				e.printStackTrace();
-				logger.severe("propertiesLoadFromXML(" + inputStream + ") InvalidPropertiesFormatException");
+				logger.error("propertiesLoadFromXML(" + inputStream + ") InvalidPropertiesFormatException");
 				properties = null;
 			} catch (IOException e) {
-				logger.severe("propertiesLoadFromXML(" + inputStream + ") IOException");
+				logger.error("propertiesLoadFromXML(" + inputStream + ") IOException");
 				properties = null;
 			}
 		}
@@ -223,15 +224,15 @@ public class NodeController extends Controller {
 	
 
 	public static void savePropertiesXML(Properties properties, String filePath, String fileName, String comment) {
-		logger.fine("savePropertiesStoreToXML(" + properties + ", " + filePath +", " + fileName + ", " + comment + ")");
+		//logger.debug("savePropertiesStoreToXML(" + properties + ", " + filePath +", " + fileName + ", " + comment + ")");
 		OutputStream outputStream = null;
 		try {
 			outputStream = new FileOutputStream(filePath + getSeperator() + fileName);
 			properties.storeToXML(outputStream, comment);
 		} catch (FileNotFoundException e) {
-			logger.severe("FileNotFoundExcetion " + e.getMessage());
+			logger.error("FileNotFoundExcetion " + e.getMessage());
 		} catch (IOException e) {
-			logger.severe("IOException " + e.getMessage());
+			logger.error("IOException " + e.getMessage());
 		} 
 //		finally {
 //			outputStream.close();
@@ -240,7 +241,7 @@ public class NodeController extends Controller {
 	}
 	
 	public static boolean savePropertiesXML(Properties properties, String fileName, String comment) {
-		logger.fine("propertiesStoreToXML(" + properties + ", " + fileName + ", " + comment + ")");
+		//logger.debug("propertiesStoreToXML(" + properties + ", " + fileName + ", " + comment + ")");
 		boolean success = false;
 		if (NodeController.newFile(fileName)) {
 			Properties sortedProperties = new Properties() {
@@ -257,10 +258,10 @@ public class NodeController extends Controller {
 				fileOutputStream.close();
 				success = true;
 			} catch (FileNotFoundException e) {
-				logger.severe("propertiesStoreToXML(" + properties + ", " + fileName + ", " + comment
+				logger.error("propertiesStoreToXML(" + properties + ", " + fileName + ", " + comment
 						+ ") FileNotFoundException");
 			} catch (IOException e) {
-				logger.severe("propertiesStoreToXML(" + properties + ", " + fileName + ", " + comment + ") IOException");
+				logger.error("propertiesStoreToXML(" + properties + ", " + fileName + ", " + comment + ") IOException");
 			}
 		}
 		return success;
@@ -272,7 +273,7 @@ public class NodeController extends Controller {
 		List<String[]> stringArrayList = new ArrayList<>();
 		try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
 			while ((line = br.readLine()) != null) {
-				logger.info(line);
+//				logger.info(line);
 				String[] array = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");// ",");
 				stringArrayList.add(array);
 			}
@@ -295,12 +296,19 @@ public class NodeController extends Controller {
 	
 	
 	public static void savePng(String filePath, String fileName, BufferedImage bufferedImage) throws Exception {
-		savePng(new File(filePath + getSeperator() + fileName), bufferedImage);
+		File file = new File(filePath + getSeperator() + fileName);
+		savePng(file, bufferedImage);
 	}
 
+	/**
+	 * If not working, check file name, may not be valid and save fails
+	 * @param file
+	 * @param bufferedImage
+	 * @throws Exception
+	 */
 	@JsonIgnore
 	public static void savePng(File file, BufferedImage bufferedImage) throws Exception {
-		logger.info("savePng(" + file + ", " + bufferedImage + ")");
+//		logger.info("savePng(" + file + ", " + bufferedImage + ")");
 		ImageIO.write(bufferedImage, "png", file);
 	}
 
@@ -312,13 +320,14 @@ public class NodeController extends Controller {
 
 	@JsonIgnore
 	public static void saveJson(File file, Object object) {
-		logger.info("saveJson(" + file.getAbsolutePath() + ","+Boolean.valueOf(object!=null)+")");
+//		logger.info("saveJson(" + file.getAbsolutePath() + ","+Boolean.valueOf(object!=null)+")");
+		file.getParentFile().mkdirs();
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 		try {
 			mapper.writerWithDefaultPrettyPrinter().writeValue(file, object);
 		} catch (IOException ex) {
-			logger.severe(ex.getMessage());
+			logger.error(ex.getMessage());
 		}
 	}
 
@@ -345,19 +354,19 @@ public class NodeController extends Controller {
 			writer = new FileWriter(filePath + getSeperator() + fileName);
 			yaml.dump(object, writer);
 		} catch (IOException ex) {
-			logger.severe(ex.getMessage());
+			logger.error(ex.getMessage());
 		}
 	}
 
 	@JsonIgnore
-	public static void saveCsv(String filePath, String fileName, Object object) {
-		logger.info("saveCsv(" + filePath + ", " + fileName + ", object)");
-		saveCsv(new File(filePath + getSeperator() + fileName), object);
+	public static void saveText(String filePath, String fileName, Object object) {
+		logger.info("saveText(" + filePath + ", " + fileName + ", object)");
+		saveText(new File(filePath + getSeperator() + fileName), object);
 	}
 
 	@JsonIgnore
-	public static void saveCsv(File file, Object object) {
-		logger.info("saveCsv(" + file + ", object)");
+	public static void saveText(File file, Object object) {
+		logger.info("saveText(" + file + ", object)");
 		try (PrintWriter writer = new PrintWriter(file)) {
 			if (object instanceof StringBuilder)
 				writer.write(((StringBuilder) object).toString());
@@ -398,46 +407,48 @@ public class NodeController extends Controller {
 		File outputFile = new File(processDirectory + getSeperator() + "output-" + uuid.toString());
 		File errorFile = new File(processDirectory + getSeperator() + "error-" + uuid.toString());
 		ProcessBuilder processBuilder = null;
-		if (isLinux()) {
+		if (isLinux() || isMac()) {
+			logger.info("executeCommand("+ command + ", " + timeout + ") linux & mac");
 			processBuilder = new ProcessBuilder("bash", "-c", command).redirectError(errorFile)
 					.redirectOutput(outputFile);
 		} else if (isWindows()) {
-			logger.info("executeCommand(...) windows");
+			logger.info("executeCommand("+ command + ", " + timeout + ") windows");
 			processBuilder = new ProcessBuilder("cmd.exe", "/c", command).redirectError(errorFile)
 					.redirectOutput(outputFile);
-		}
-
+		} 
 		Process process = null;
 		String output = null;
 		String error = null;
-		List<String> stringList = new ArrayList<>();
 		String string;
 		try {
 			process = processBuilder.start();
 			if (!process.waitFor(timeout, TimeUnit.SECONDS)) {
 				process.destroy();
-				logger.info("executeCommand(...) processs.exitValue=" + process.exitValue());
+				logger.info("executeCommand("+ command + ", " + timeout + ") processs.exitValue=" + process.exitValue());
 			}
 			output = (FileUtils.readFileToString(outputFile, "UTF8"));
 			error = (FileUtils.readFileToString(errorFile, "UTF8"));
 			if (error != null && !error.equals("")) {
-				string = "error";
-				stringList.add(string);
-			} else if (output != null && !output.equals("")) {
+				string = error;
+				String[] stringArray = string.split("\n");
+				for (String s : stringArray) {
+					exit.error.add(s);
+				}
+			} 
+			if (output != null && !output.equals("")) {
 				string = output;
 				String[] stringArray = string.split("\n");
 				for (String s : stringArray) {
-					stringList.add(s);
+					exit.list.add(s);
 				}
 			}
 		} catch (Exception e) {
-			logger.severe("executeCommand(...) Exception " + e.getMessage());
-			throw new Exception("process timed out");
+			logger.error("executeCommand("+ command + ", " + timeout + ") Exception: " + e.getMessage());
+			throw new Exception("executeCommand("+ command + ", " + timeout + ") Exception: " + e.getMessage());
 		} finally {
-			logger.fine("executeCommand(...) process.exitValue=" + process.exitValue());
+			//logger.debug("executeCommand(...) process.exitValue=" + process.exitValue());
 			exit.value = process.exitValue();
 		}
-		exit.list = stringList;
 		return exit;
 	}
 
@@ -498,7 +509,7 @@ public class NodeController extends Controller {
 	}
 
 	public static boolean newFile(File file) {
-		logger.finest("newFile(" + file + ")");
+		//logger.debug("newFile(" + file + ")");
 		boolean success = false;
 		String newFileAbsolutePath = FilenameUtils.normalize(file.getAbsolutePath());
 		File newFile = new File(newFileAbsolutePath);
@@ -509,7 +520,7 @@ public class NodeController extends Controller {
 			try {
 				success = newFile.createNewFile();
 			} catch (IOException e) {
-				logger.severe("newFile(" + file + ") IOException");
+				logger.error("newFile(" + file + ") IOException");
 			}
 		} else {
 			success = true;
@@ -536,10 +547,10 @@ public class NodeController extends Controller {
 			fileOutputStream.close();
 			success = true;
 		} catch (FileNotFoundException e) {
-			logger.severe("writeFile(" + file + ", " + byteArray + ") FileNotFoundException");
+			logger.error("writeFile(" + file + ", " + byteArray + ") FileNotFoundException");
 			success = false;
 		} catch (IOException e) {
-			logger.severe("writeFile(" + file + ", " + byteArray + ") IOException");
+			logger.error("writeFile(" + file + ", " + byteArray + ") IOException");
 			success = false;
 		}
 		return success;
@@ -569,19 +580,19 @@ public class NodeController extends Controller {
 			encryptedByteArray = appendByteArrays(encryptedByteArray, cipherText);
 			flag = writeFile(file, encryptedByteArray);
 		} catch (NoSuchAlgorithmException e) {
-			logger.severe("writeEncryptedFile(" + file + ", " + byteArray + ", password) NoSuchAlgorithmException");
+			logger.error("writeEncryptedFile(" + file + ", " + byteArray + ", password) NoSuchAlgorithmException");
 		} catch (InvalidKeySpecException e) {
-			logger.severe("writeEncryptedFile(" + file + ", " + byteArray + ", password) InvalidKeySpecException");
+			logger.error("writeEncryptedFile(" + file + ", " + byteArray + ", password) InvalidKeySpecException");
 		} catch (InvalidKeyException e) {
-			logger.severe("writeEncryptedFile(" + file + ", " + byteArray + ", password) InvalidKeyException");
+			logger.error("writeEncryptedFile(" + file + ", " + byteArray + ", password) InvalidKeyException");
 		} catch (NoSuchPaddingException e) {
-			logger.severe("writeEncryptedFile(" + file + ", " + byteArray + ", password) NoSuchPaddingException");
+			logger.error("writeEncryptedFile(" + file + ", " + byteArray + ", password) NoSuchPaddingException");
 		} catch (IllegalBlockSizeException e) {
-			logger.severe("writeEncryptedFile(" + file + ", " + byteArray + ", password) IllegalBlockSizeException");
+			logger.error("writeEncryptedFile(" + file + ", " + byteArray + ", password) IllegalBlockSizeException");
 		} catch (BadPaddingException e) {
-			logger.severe("writeEncryptedFile(" + file + ", " + byteArray + ", password) BadPaddingException");
+			logger.error("writeEncryptedFile(" + file + ", " + byteArray + ", password) BadPaddingException");
 		} catch (InvalidParameterSpecException e) {
-			logger.severe("writeEncryptedFile(" + file + ", " + byteArray + ", password) InvalidParameterSpecException");
+			logger.error("writeEncryptedFile(" + file + ", " + byteArray + ", password) InvalidParameterSpecException");
 		}
 		return flag;
 	}
@@ -599,10 +610,10 @@ public class NodeController extends Controller {
 				fileInputStream = new FileInputStream(file);
 				byteArray = readFile(fileInputStream, (int) file.length());
 			} catch (FileNotFoundException e) {
-				logger.severe("readFile(" + file + ") FileNotFoundException");
+				logger.error("readFile(" + file + ") FileNotFoundException");
 			}
 		} else {
-			logger.severe("readFile(" + file + ") (file.isFile() == false)");
+			logger.error("readFile(" + file + ") (file.isFile() == false)");
 		}
 		return byteArray;
 	}
@@ -616,7 +627,7 @@ public class NodeController extends Controller {
 				BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
 				bufferedInputStream.read(byteArray);
 			} catch (IOException e) {
-				logger.severe("readFile(" + inputStream + ", " + fileLength + ") IOException");
+				logger.error("readFile(" + inputStream + ", " + fileLength + ") IOException");
 			}
 		}
 		return byteArray;
@@ -638,7 +649,7 @@ public class NodeController extends Controller {
 				for (int i = 0; i < byteListSize; i++)
 					byteArray[i] = ((Byte) byteList.get(i)).byteValue();
 			} catch (IOException e) {
-				logger.severe("readFile(" + inputStream + ") IOException");
+				logger.error("readFile(" + inputStream + ") IOException");
 			}
 		}
 		return byteArray;
@@ -661,21 +672,21 @@ public class NodeController extends Controller {
 			String plainText = new String(cipher.doFinal(cipherText), "UTF-8");
 			inputStream = new ByteArrayInputStream(plainText.getBytes());
 		} catch (NoSuchAlgorithmException e) {
-			logger.severe("readEncryptedFile(" + file + ", password) NoSuchAlgorithmException");
+			logger.error("readEncryptedFile(" + file + ", password) NoSuchAlgorithmException");
 		} catch (InvalidKeySpecException e) {
-			logger.severe("readEncryptedFile(" + file + ", password) InvalidKeySpecException");
+			logger.error("readEncryptedFile(" + file + ", password) InvalidKeySpecException");
 		} catch (InvalidKeyException e) {
-			logger.severe("readEncryptedFile(" + file + ", password) InvalidKeyException");
+			logger.error("readEncryptedFile(" + file + ", password) InvalidKeyException");
 		} catch (NoSuchPaddingException e) {
-			logger.severe("readEncryptedFile(" + file + ", password) NoSuchPaddingException");
+			logger.error("readEncryptedFile(" + file + ", password) NoSuchPaddingException");
 		} catch (IllegalBlockSizeException e) {
-			logger.severe("readEncryptedFile(" + file + ", password) IllegalBlockSizeException");
+			logger.error("readEncryptedFile(" + file + ", password) IllegalBlockSizeException");
 		} catch (BadPaddingException e) {
-			logger.severe("readEncryptedFile(" + file + ", password) BadPaddingException");
+			logger.error("readEncryptedFile(" + file + ", password) BadPaddingException");
 		} catch (UnsupportedEncodingException e) {
-			logger.severe("readEncryptedFile(" + file + ", password) UnsupportedEncodingException");
+			logger.error("readEncryptedFile(" + file + ", password) UnsupportedEncodingException");
 		} catch (InvalidAlgorithmParameterException e) {
-			logger.severe("readEncryptedFile(" + file + ", password) InvalidAlgorithmParameterException");
+			logger.error("readEncryptedFile(" + file + ", password) InvalidAlgorithmParameterException");
 		}
 		return inputStream;
 	}

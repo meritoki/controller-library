@@ -1,25 +1,57 @@
-# Controller Library
+# Implementation
+An implementation is the process of manifesting an instance of a system.
+## Citation
+If one uses Controller for data processing and publishes the results obtained, please cite Controller in publications as follows:
 
-## Implementation
+Rodriguez, J. O. (2019-2021). Controller (Version 0.4.202106) [Software]. Meritoki.
+https://github.com/meritoki/controller-library
 
-### Guide
+## License
+* Apache 2.0
 
-#### Requirements
+## Code
+Code is the set of instructions for a computer system that has the specified features and performs the specified functions to save time.
 
-##### Source
-1. Apache Maven
-2. Git
+### Repository
+Code is managed in repositories that enable access to one or more users with correct credentials. The following table specifies one or more repositories used by this system.
 
-#### Package
+| Software | Name |
+| ----------- | ----------- |
+| Meritoki Controller Library | [controller-library](https://github.com/meritoki/controller-library) |
 
-##### Source
+## Guide
+Guide section provides information about use.
 
-###### Clone
-`$ git clone https://github.com/meritoki/controller-library.git`
+### Requirements
+* Git
+* Maven
 
-###### Build
+### Distribution
+* [Releases](https://github.com/meritoki/controller-library)
 
-`$ cd controller-library`
+### Package
+#### Source
+##### Git
+```
+git clone git@github.com:meritoki/controller-library.git
+```
 
-`$ mvn install`
+### Installation
+#### Source
+##### Maven
+```
+cd controller-library
+mvn install
+```
 
+### Use
+#### Maven
+Add the following dependency to your pom.xml
+```
+<dependency>
+  <groupId>com.meritoki.library</groupId>
+  <artifactId>controller</artifactId>
+  <version>0.4.202106</version>
+</dependency>
+
+```

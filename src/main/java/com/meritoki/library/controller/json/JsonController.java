@@ -29,6 +29,8 @@ import com.meritoki.library.controller.Controller;
 
 public class JsonController extends Controller {
 	protected static Logger logger = Logger.getLogger(JsonController.class.getName());
+	
+	//https://stackoverflow.com/questions/6349421/how-to-use-jackson-to-deserialise-an-array-of-objects
 	public static <T> Object getObject(String string, TypeReference<List<T>> typeReference) {
 		logger.fine("getObject(" + string + ", " + typeReference + ")");
 		Object object = null;
@@ -67,10 +69,11 @@ public class JsonController extends Controller {
 		String string = null;
 		ObjectMapper mapper = new ObjectMapper();
 		try {
-			string = mapper.writeValueAsString(object);
+			string = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
+//		System.out.println("getJson("+object+") string="+string);
 		return string;
 	}
 }

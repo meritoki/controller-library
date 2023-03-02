@@ -15,13 +15,15 @@
  */
 package com.meritoki.library.controller.time;
 
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.meritoki.library.controller.Controller;
 
 public class TimeController extends Controller {
 	
-	protected static Logger logger = Logger.getLogger(TimeController.class.getName());
+	protected static Logger logger = LoggerFactory.getLogger(TimeController.class.getName());
 	public static long startTime;
 	public static long stopTime;
 
