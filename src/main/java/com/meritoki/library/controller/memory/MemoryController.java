@@ -15,13 +15,16 @@
  */
 package com.meritoki.library.controller.memory;
 
-import java.util.logging.Logger;
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.meritoki.library.controller.Controller;
 
 public class MemoryController extends Controller {
 	
-	protected static Logger logger = Logger.getLogger(MemoryController.class.getName());
+	protected static Logger logger = LoggerFactory.getLogger(MemoryController.class.getName());
 
 	public static void log() {
 		double max = Runtime.getRuntime().maxMemory();
