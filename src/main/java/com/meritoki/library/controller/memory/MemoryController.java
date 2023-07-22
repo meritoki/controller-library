@@ -34,4 +34,12 @@ public class MemoryController extends Controller {
 		logger.info("log() total(bytes)="+total+" total(kilobytes)="+total/1000+" total(megabytes)="+total/1000000+" total(gigabytes)="+total/1000000000);
 		logger.info("log() free(bytes)="+free+" free(kilobytes)="+free/1000+" free(megabytes)="+free/1000000+" free(gigabytes)="+free/1000000000);
 	}
+	
+	public static boolean bumper() {
+		double max = Runtime.getRuntime().maxMemory();
+		double free = Runtime.getRuntime().freeMemory();
+		boolean flag = free / max > 0.05;
+		logger.info("bumper() flag="+flag);
+		return flag;
+	}
 }
