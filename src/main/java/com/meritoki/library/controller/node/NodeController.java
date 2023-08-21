@@ -21,6 +21,7 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -54,6 +55,7 @@ import java.util.Date;
 import java.util.InvalidPropertiesFormatException;
 import java.util.List;
 import java.util.Properties;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -395,10 +397,21 @@ public class NodeController extends Controller {
 	public static Exit executeCommand(String command) throws Exception {
 		return executeCommand(command, 120);
 	}
+	
+	@JsonIgnore
+	public static Exit executeCommand(boolean sudoFlag, String command) throws Exception {
+		return executeCommand(sudoFlag, command, 120);
+	}
 
 	@JsonIgnore
 	public static Exit executeCommand(String command, int timeout) throws Exception {
 		logger.info("executeCommand(" + command + ", " + timeout + ")");
+		return executeCommand(false, command,timeout);
+	}
+
+	@JsonIgnore
+	public static Exit executeCommand(boolean sudoFlag, String command, int timeout) throws Exception {
+		logger.info("executeCommand(" + sudoFlag +", "+ command + ", " + timeout + ")");
 		Exit exit = new Exit();
 		UUID uuid = UUID.randomUUID();
 		File processDirectory = new File("process");
@@ -412,9 +425,26 @@ public class NodeController extends Controller {
 		File errorFile = new File(processDirectory + getSeperator() + dateString + "-error-" + uuid.toString());
 		ProcessBuilder processBuilder = null;
 		if (isLinux() || isMac()) {
-			logger.debug("executeCommand(" + command + ", " + timeout + ") linux & mac");
-			processBuilder = new ProcessBuilder("bash", "-c", command).redirectError(errorFile)
-					.redirectOutput(outputFile);
+			logger.debug("executeCommand(" + sudoFlag +", "+command + ", " + timeout + ") linux & mac");
+			if (sudoFlag) {
+				Console console = System.console();
+				String password = "";
+				if(console != null) {
+					char[] passwordArray = console.readPassword("Enter password");
+					password = String.valueOf(passwordArray);
+				} else {
+					System.out.println("Enter password");
+					Scanner scanner = new Scanner(System.in);
+					if(scanner.hasNext()) {
+						password = scanner.nextLine();
+					}
+				}
+				processBuilder = new ProcessBuilder("bash", "-c", "echo "+password+" | sudo -S "+command).redirectError(errorFile)
+						.redirectOutput(outputFile);
+			} else {
+				processBuilder = new ProcessBuilder("bash", "-c", command).redirectError(errorFile)
+						.redirectOutput(outputFile);
+			}
 		} else if (isWindows()) {
 			logger.debug("executeCommand(" + command + ", " + timeout + ") windows");
 			processBuilder = new ProcessBuilder("cmd.exe", "/c", command).redirectError(errorFile)
