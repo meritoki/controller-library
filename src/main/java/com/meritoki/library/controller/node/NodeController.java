@@ -34,6 +34,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.file.FileSystems;
 import java.security.AlgorithmParameters;
@@ -137,6 +138,23 @@ public class NodeController extends Controller {
 
 	public static boolean isMac() {
 		return (getOperatingSystem().toLowerCase().contains("mac"));
+	}
+	
+	/**
+	 * Function can be used to copy resource from resources/ Folder to a specified path
+	 * getResource(getClass(),"/file.sh",".")
+	 * @param clazz
+	 * @param resource
+	 * @param path
+	 * @return
+	 * @throws Exception
+	 */
+	public static boolean getResource(Class clazz, String resource, String path) throws Exception {
+		logger.info("getResource("+clazz+", "+resource+", "+path+")");
+		URL url = clazz.getResource(resource);
+		File destination = new File(path+resource);
+		FileUtils.copyURLToFile(url, destination);
+		return destination.exists();
 	}
 
 	public static BufferedImage openBufferedImage(String filePath, String fileName) {

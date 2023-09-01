@@ -38,7 +38,7 @@ public class MemoryController extends Controller {
 	public static boolean bumper() {
 		double max = Runtime.getRuntime().maxMemory();
 		double free = Runtime.getRuntime().freeMemory();
-		boolean flag = free / max > 0.05;
+		boolean flag = free / max > 0.01;
 		logger.info("bumper() flag="+flag);
 		return flag;
 	}
