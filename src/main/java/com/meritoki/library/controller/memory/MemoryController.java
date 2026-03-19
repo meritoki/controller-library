@@ -15,20 +15,31 @@
  */
 package com.meritoki.library.controller.memory;
 
-import java.util.logging.Logger;
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.meritoki.library.controller.Controller;
 
 public class MemoryController extends Controller {
 	
-	protected static Logger logger = Logger.getLogger(MemoryController.class.getName());
+	protected static Logger logger = LoggerFactory.getLogger(MemoryController.class.getName());
 
 	public static void log() {
 		double max = Runtime.getRuntime().maxMemory();
 		double total = Runtime.getRuntime().totalMemory();
 		double free = Runtime.getRuntime().freeMemory();
-		logger.info("log() max(bytes)="+max+" max(kilobytes)="+max/1000+" max(megabytes)="+max/1000000+" max(gigabytes)="+max/1000000000);
-		logger.info("log() total(bytes)="+total+" total(kilobytes)="+total/1000+" total(megabytes)="+total/1000000+" total(gigabytes)="+total/1000000000);
-		logger.info("log() free(bytes)="+free+" free(kilobytes)="+free/1000+" free(megabytes)="+free/1000000+" free(gigabytes)="+free/1000000000);
+		logger.info("log() max(GB)="+max/1000000000);
+		logger.info("log() total(GB)="+total/1000000000);
+		logger.info("log() free(GB)="+free/1000000000);
+	}
+	
+	public static boolean bumper() {
+		double max = Runtime.getRuntime().maxMemory();
+		double free = Runtime.getRuntime().freeMemory();
+		boolean flag = free / max > 0.01;
+		logger.info("bumper() flag="+flag);
+		return flag;
 	}
 }
