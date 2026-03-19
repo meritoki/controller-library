@@ -99,6 +99,15 @@ public class NodeController extends Controller {
 	public static String getSeperator() {
 		return FileSystems.getDefault().getSeparator();
 	}
+	
+	public static String getWindowsEscapedSeperator() {
+		String seperator  = "";
+		seperator+=FileSystems.getDefault().getSeparator();
+		seperator+=FileSystems.getDefault().getSeparator();
+		seperator+=FileSystems.getDefault().getSeparator();
+		seperator+=FileSystems.getDefault().getSeparator();
+		return seperator;
+	}
 
 	public static String getUserHome() {
 		return System.getProperty("user.home");
@@ -406,7 +415,6 @@ public class NodeController extends Controller {
 		try (PrintWriter out = new PrintWriter(fileName)) {
 			out.println(content);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -431,16 +439,15 @@ public class NodeController extends Controller {
 	public static Exit executeCommand(boolean sudoFlag, String command, int timeout) throws Exception {
 		logger.info("executeCommand(" + sudoFlag +", "+ command + ", " + timeout + ")");
 		Exit exit = new Exit();
-		UUID uuid = UUID.randomUUID();
 		File processDirectory = new File("process");
 		if (!processDirectory.exists()) {
 			processDirectory.mkdir();
 		}
 		Date date = Calendar.getInstance().getTime();
-		DateFormat dateFormat = new SimpleDateFormat("yyyyMMddhhmmss");
+		DateFormat dateFormat = new SimpleDateFormat("yyyyMMddhh");
 		String dateString = dateFormat.format(date);
-		File outputFile = new File(processDirectory + getSeperator() + dateString + "-output-" + uuid.toString());
-		File errorFile = new File(processDirectory + getSeperator() + dateString + "-error-" + uuid.toString());
+		File outputFile = new File(processDirectory + getSeperator() + dateString + "-output");
+		File errorFile = new File(processDirectory + getSeperator() + dateString + "-error");
 		ProcessBuilder processBuilder = null;
 		if (isLinux() || isMac()) {
 			logger.debug("executeCommand(" + sudoFlag +", "+command + ", " + timeout + ") linux & mac");
