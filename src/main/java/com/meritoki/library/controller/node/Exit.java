@@ -6,7 +6,7 @@ import java.util.List;
 public class Exit {
 	public List<String> error = new ArrayList<String>();
 	public List<String> list = new ArrayList<String>();
-	public int value;
+	public int value = 1;
 
 	public String getOutput() {
 		StringBuilder sb = new StringBuilder();
