@@ -59,7 +59,6 @@ import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import javax.crypto.BadPaddingException;
@@ -86,6 +85,7 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.meritoki.library.controller.Controller;
 
@@ -362,6 +362,18 @@ public class NodeController extends Controller {
 			logger.error(ex.getMessage());
 		}
 	}
+	
+    public static void appendJson(String filePath, List<Object> objectList) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        File file = new File(filePath);
+        boolean append = file.exists() && file.length() > 0;
+        try (FileWriter writer = new FileWriter(file, append);
+             SequenceWriter seqWriter = mapper.writerWithDefaultPrettyPrinter().writeValuesAsArray(writer)) {
+            for (Object obj : objectList) {
+                seqWriter.write(obj);
+            }
+        }
+    }
 
 	@JsonIgnore
 	public static void saveProperties(String path, String name, Properties properties) {
