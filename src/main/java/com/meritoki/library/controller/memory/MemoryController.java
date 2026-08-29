@@ -27,12 +27,14 @@ public class MemoryController extends Controller {
 	protected static Logger logger = LoggerFactory.getLogger(MemoryController.class.getName());
 
 	public static void log() {
-		double max = Runtime.getRuntime().maxMemory();
-		double total = Runtime.getRuntime().totalMemory();
-		double free = Runtime.getRuntime().freeMemory();
-		logger.info("log() max(GB)="+max/1000000000);
-		logger.info("log() total(GB)="+total/1000000000);
-		logger.info("log() free(GB)="+free/1000000000);
+		double max = Runtime.getRuntime().maxMemory();//max jvm is allowed to use
+		double total = Runtime.getRuntime().totalMemory();//total jvm has reserved
+		double free = Runtime.getRuntime().freeMemory();//free memory currently reserved
+		double use = total-free;
+		logger.info("log() max(GB)="+String.format("%.3f",max/1000000000)
+		+" total(GB)="+String.format("%.3f",total/1000000000)
+		+" free(GB)="+String.format("%.3f",free/1000000000)
+		+" use(GB)="+String.format("%.3f",use/1000000000));
 	}
 	
 	public static boolean bumper() {
