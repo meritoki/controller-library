@@ -1,0 +1,10 @@
+.settings/
+dependency-reduced-pom.xml
+target/
+.project
+.classpath
+bin/
+archive/
+.externalToolBuilders/
+logs/
+process/
