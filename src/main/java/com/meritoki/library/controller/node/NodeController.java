@@ -205,7 +205,7 @@ public class NodeController extends Controller {
 //        awtModule.addDeserializer(Color.class, new ColorJsonDeserializer());
 		ObjectMapper mapper = new ObjectMapper();
 //		mapper.registerModule(awtModule);
-		if (file.exists()) {
+//		if (file.exists()) {
 			try {
 				object = mapper.readValue(file, className);
 			} catch (JsonGenerationException e) {
@@ -215,7 +215,7 @@ public class NodeController extends Controller {
 			} catch (IOException e) {
 				logger.error(e.getMessage());
 			}
-		}
+//		}
 		return object;
 	}
 
@@ -225,7 +225,7 @@ public class NodeController extends Controller {
 //		SimpleModule awtModule = new SimpleModule("AWT Module");
 //        awtModule.addSerializer(Color.class, new ColorJsonSerializer());
 //        awtModule.addDeserializer(Color.class, new ColorJsonDeserializer());
-		if (file.exists()) {
+//		if (file.exists()) {
 			ObjectMapper mapper = new ObjectMapper();
 //		mapper.registerModule(awtModule);
 			try {
@@ -237,7 +237,7 @@ public class NodeController extends Controller {
 			} catch (IOException e) {
 				logger.error(e.getMessage());
 			}
-		}
+//		}
 		return object;
 	}
 
@@ -609,6 +609,14 @@ public class NodeController extends Controller {
 			}
 		}
 		return directory.delete();
+	}
+	
+	public static boolean deleteFile(File file) {
+		if(file.exists()) {
+			file.delete();
+			return true;
+		}
+		return false;
 	}
 
 	public File[] getDirectoryFileArray(String directoryName) {
