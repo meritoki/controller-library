@@ -15,4 +15,13 @@
  */
 package com.meritoki.library.controller;
 
-public class Controller {}
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class Controller {
+	static Logger logger = LoggerFactory.getLogger(Controller.class);
+
+	public static void main(String[] args) {
+		logger.info("Hello World");
+	}
+}

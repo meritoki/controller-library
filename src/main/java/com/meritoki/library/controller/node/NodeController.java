@@ -15,12 +15,14 @@
  */
 package com.meritoki.library.controller.node;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -33,6 +35,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.file.FileSystems;
 import java.security.AlgorithmParameters;
@@ -44,15 +47,19 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.KeySpec;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.InvalidPropertiesFormatException;
 import java.util.List;
 import java.util.Properties;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import javax.crypto.BadPaddingException;
@@ -74,12 +81,24 @@ import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.meritoki.library.controller.Controller;
 
 public class NodeController extends Controller {
@@ -93,6 +112,15 @@ public class NodeController extends Controller {
 		return FileSystems.getDefault().getSeparator();
 	}
 
+	public static String getWindowsEscapedSeperator() {
+		String seperator = "";
+		seperator += FileSystems.getDefault().getSeparator();
+		seperator += FileSystems.getDefault().getSeparator();
+		seperator += FileSystems.getDefault().getSeparator();
+		seperator += FileSystems.getDefault().getSeparator();
+		return seperator;
+	}
+
 	public static String getUserHome() {
 		return System.getProperty("user.home");
 	}
@@ -100,7 +128,7 @@ public class NodeController extends Controller {
 	public static String getOperatingSystem() {
 		return System.getProperty("os.name");
 	}
-	
+
 	public String getHostAddress() {
 		String hostAddress = null;
 		try {
@@ -128,9 +156,27 @@ public class NodeController extends Controller {
 	public static boolean isLinux() {
 		return (getOperatingSystem().toLowerCase().contains("linux"));
 	}
-	
+
 	public static boolean isMac() {
 		return (getOperatingSystem().toLowerCase().contains("mac"));
+	}
+
+	/**
+	 * Function can be used to copy resource from resources/ Folder to a specified
+	 * path getResource(getClass(),"/file.sh",".")
+	 * 
+	 * @param clazz
+	 * @param resource
+	 * @param path
+	 * @return
+	 * @throws Exception
+	 */
+	public static boolean getResource(Class clazz, String resource, String path) throws Exception {
+		logger.info("getResource(" + clazz + ", " + resource + ", " + path + ")");
+		URL url = clazz.getResource(resource);
+		File destination = new File(path + resource);
+		FileUtils.copyURLToFile(url, destination);
+		return destination.exists();
 	}
 
 	public static BufferedImage openBufferedImage(String filePath, String fileName) {
@@ -140,7 +186,7 @@ public class NodeController extends Controller {
 
 	public static BufferedImage openBufferedImage(java.io.File file) {
 		BufferedImage bufferedImage = null;
-		if(file != null) {
+		if (file != null) {
 			try {
 				bufferedImage = ImageIO.read(file);
 			} catch (IOException ex) {
@@ -152,39 +198,51 @@ public class NodeController extends Controller {
 
 	@JsonIgnore
 	public static Object openJson(java.io.File file, Class className) {
-		//logger.debug("openJson(" + file + ", " + className + ")");
+		// logger.debug("openJson(" + file + ", " + className + ")");
 		Object object = null;
+//		SimpleModule awtModule = new SimpleModule("AWT Module");
+//        awtModule.addSerializer(Color.class, new ColorJsonSerializer());
+//        awtModule.addDeserializer(Color.class, new ColorJsonDeserializer());
 		ObjectMapper mapper = new ObjectMapper();
-		try {
-			object = mapper.readValue(file, className);
-		} catch (JsonGenerationException e) {
-			logger.error(e.getMessage());
-		} catch (JsonMappingException e) {
-			logger.error(e.getMessage());
-		} catch (IOException e) {
-			logger.error(e.getMessage());
-		}
+//		mapper.registerModule(awtModule);
+//		if (file.exists()) {
+			try {
+				object = mapper.readValue(file, className);
+			} catch (JsonGenerationException e) {
+				logger.error(e.getMessage());
+			} catch (JsonMappingException e) {
+				logger.error(e.getMessage());
+			} catch (IOException e) {
+				logger.error(e.getMessage());
+			}
+//		}
 		return object;
 	}
 
 	public static <T> Object openJson(File file, TypeReference<List<T>> typeReference) {
-		//logger.debug("openJson(" + file + ", " + typeReference + ")");
+		// logger.debug("openJson(" + file + ", " + typeReference + ")");
 		Object object = null;
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			object = mapper.readValue(file, typeReference);
-		} catch (JsonGenerationException e) {
-			logger.error(e.getMessage());
-		} catch (JsonMappingException e) {
-			logger.error(e.getMessage());
-		} catch (IOException e) {
-			logger.error(e.getMessage());
-		}
+//		SimpleModule awtModule = new SimpleModule("AWT Module");
+//        awtModule.addSerializer(Color.class, new ColorJsonSerializer());
+//        awtModule.addDeserializer(Color.class, new ColorJsonDeserializer());
+//		if (file.exists()) {
+			ObjectMapper mapper = new ObjectMapper();
+//		mapper.registerModule(awtModule);
+			try {
+				object = mapper.readValue(file, typeReference);
+			} catch (JsonGenerationException e) {
+				logger.error(e.getMessage());
+			} catch (JsonMappingException e) {
+				logger.error(e.getMessage());
+			} catch (IOException e) {
+				logger.error(e.getMessage());
+			}
+//		}
 		return object;
 	}
-	
+
 	public static Properties openPropertiesXML(String filePath, String fileName) {
-		return openPropertiesXML(new File(filePath+getSeperator()+fileName));
+		return openPropertiesXML(new File(filePath + getSeperator() + fileName));
 	}
 
 	public static Properties openPropertiesXML(File file) {
@@ -200,10 +258,9 @@ public class NodeController extends Controller {
 		}
 		return properties;
 	}
-	
 
 	public static Properties openPropertiesXML(InputStream inputStream) {
-		//logger.debug("openPropertiesXML(" + inputStream + ")");
+		// logger.debug("openPropertiesXML(" + inputStream + ")");
 		Properties properties = null;
 		if (inputStream != null) {
 			try {
@@ -220,11 +277,10 @@ public class NodeController extends Controller {
 		}
 		return properties;
 	}
-	
-	
 
 	public static void savePropertiesXML(Properties properties, String filePath, String fileName, String comment) {
-		//logger.debug("savePropertiesStoreToXML(" + properties + ", " + filePath +", " + fileName + ", " + comment + ")");
+		// logger.debug("savePropertiesStoreToXML(" + properties + ", " + filePath +", "
+		// + fileName + ", " + comment + ")");
 		OutputStream outputStream = null;
 		try {
 			outputStream = new FileOutputStream(filePath + getSeperator() + fileName);
@@ -233,15 +289,16 @@ public class NodeController extends Controller {
 			logger.error("FileNotFoundExcetion " + e.getMessage());
 		} catch (IOException e) {
 			logger.error("IOException " + e.getMessage());
-		} 
+		}
 //		finally {
 //			outputStream.close();
 //		}
-		
+
 	}
-	
+
 	public static boolean savePropertiesXML(Properties properties, String fileName, String comment) {
-		//logger.debug("propertiesStoreToXML(" + properties + ", " + fileName + ", " + comment + ")");
+		// logger.debug("propertiesStoreToXML(" + properties + ", " + fileName + ", " +
+		// comment + ")");
 		boolean success = false;
 		if (NodeController.newFile(fileName)) {
 			Properties sortedProperties = new Properties() {
@@ -293,8 +350,7 @@ public class NodeController extends Controller {
 		logger.info("saveJpg(" + file + ", " + bufferedImage + ")");
 		ImageIO.write(bufferedImage, "jpg", file);
 	}
-	
-	
+
 	public static void savePng(String filePath, String fileName, BufferedImage bufferedImage) throws Exception {
 		File file = new File(filePath + getSeperator() + fileName);
 		savePng(file, bufferedImage);
@@ -302,6 +358,7 @@ public class NodeController extends Controller {
 
 	/**
 	 * If not working, check file name, may not be valid and save fails
+	 * 
 	 * @param file
 	 * @param bufferedImage
 	 * @throws Exception
@@ -322,12 +379,50 @@ public class NodeController extends Controller {
 	public static void saveJson(File file, Object object) {
 //		logger.info("saveJson(" + file.getAbsolutePath() + ","+Boolean.valueOf(object!=null)+")");
 		file.getParentFile().mkdirs();
+//		SimpleModule awtModule = new SimpleModule("AWT Module");
+//        awtModule.addSerializer(Color.class, new ColorJsonSerializer());
+//        awtModule.addDeserializer(Color.class, new ColorJsonDeserializer());
 		ObjectMapper mapper = new ObjectMapper();
+//		mapper.registerModule(awtModule);
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 		try {
 			mapper.writerWithDefaultPrettyPrinter().writeValue(file, object);
 		} catch (IOException ex) {
 			logger.error(ex.getMessage());
+		}
+	}
+
+	public static void appendJson(String filePath, List<?> objectList) throws IOException {
+		SimpleModule awtModule = new SimpleModule("AWT Module");
+		awtModule.addSerializer(Color.class, new ColorJsonSerializer());
+		awtModule.addDeserializer(Color.class, new ColorJsonDeserializer());
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(awtModule);
+		File file = new File(filePath);
+//        boolean append = file.exists() && file.length() > 0;
+		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+//        try (FileWriter writer = new FileWriter(file, true);
+//             SequenceWriter seqWriter = mapper.writerWithDefaultPrettyPrinter().writeValuesAsArray(writer)) {
+//            for (Object obj : objectList) {
+//                seqWriter.write(obj);
+//            }
+//        }
+		JsonFactory factory = mapper.getFactory();
+
+		try (JsonGenerator generator = factory.createGenerator(file, JsonEncoding.UTF8)) {
+
+			// 1. Manually write the starting array bracket '['
+			generator.writeStartArray();
+
+			// 2. Initialize the SequenceWriter with false (do not wrap)
+			try (SequenceWriter sw = mapper.writer().writeValues(generator)) {
+				for (Object obj : objectList) {
+					sw.write(obj);
+				}
+			}
+
+			// 3. Manually write the ending array bracket ']'
+			generator.writeEndArray();
 		}
 	}
 
@@ -378,14 +473,11 @@ public class NodeController extends Controller {
 			System.out.println(e.getMessage());
 		}
 	}
-	
-	
-	
+
 	public static void savePython(String fileName, String content) {
 		try (PrintWriter out = new PrintWriter(fileName)) {
-		    out.println(content);
+			out.println(content);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -396,26 +488,56 @@ public class NodeController extends Controller {
 	}
 
 	@JsonIgnore
+	public static Exit executeCommand(boolean sudoFlag, String command) throws Exception {
+		return executeCommand(sudoFlag, command, 120);
+	}
+
+	@JsonIgnore
 	public static Exit executeCommand(String command, int timeout) throws Exception {
 		logger.info("executeCommand(" + command + ", " + timeout + ")");
+		return executeCommand(false, command, timeout);
+	}
+
+	@JsonIgnore
+	public static Exit executeCommand(boolean sudoFlag, String command, int timeout) throws Exception {
+		logger.info("executeCommand(" + sudoFlag + ", " + command + ", " + timeout + ")");
 		Exit exit = new Exit();
-		UUID uuid = UUID.randomUUID();
 		File processDirectory = new File("process");
 		if (!processDirectory.exists()) {
 			processDirectory.mkdir();
 		}
-		File outputFile = new File(processDirectory + getSeperator() + "output-" + uuid.toString());
-		File errorFile = new File(processDirectory + getSeperator() + "error-" + uuid.toString());
+		Date date = Calendar.getInstance().getTime();
+		DateFormat dateFormat = new SimpleDateFormat("yyyyMMddhh");
+		String dateString = dateFormat.format(date);
+		File outputFile = new File(processDirectory + getSeperator() + dateString + "-output");
+		File errorFile = new File(processDirectory + getSeperator() + dateString + "-error");
 		ProcessBuilder processBuilder = null;
 		if (isLinux() || isMac()) {
-			logger.info("executeCommand("+ command + ", " + timeout + ") linux & mac");
-			processBuilder = new ProcessBuilder("bash", "-c", command).redirectError(errorFile)
-					.redirectOutput(outputFile);
+			logger.debug("executeCommand(" + sudoFlag + ", " + command + ", " + timeout + ") linux & mac");
+			if (sudoFlag) {
+				Console console = System.console();
+				String password = "";
+				if (console != null) {
+					char[] passwordArray = console.readPassword("Enter password");
+					password = String.valueOf(passwordArray);
+				} else {
+					System.out.println("Enter password");
+					Scanner scanner = new Scanner(System.in);
+					if (scanner.hasNext()) {
+						password = scanner.nextLine();
+					}
+				}
+				processBuilder = new ProcessBuilder("bash", "-c", "echo " + password + " | sudo -S " + command)
+						.redirectError(errorFile).redirectOutput(outputFile);
+			} else {
+				processBuilder = new ProcessBuilder("bash", "-c", command).redirectError(errorFile)
+						.redirectOutput(outputFile);
+			}
 		} else if (isWindows()) {
-			logger.info("executeCommand("+ command + ", " + timeout + ") windows");
+			logger.debug("executeCommand(" + command + ", " + timeout + ") windows");
 			processBuilder = new ProcessBuilder("cmd.exe", "/c", command).redirectError(errorFile)
 					.redirectOutput(outputFile);
-		} 
+		}
 		Process process = null;
 		String output = null;
 		String error = null;
@@ -424,7 +546,8 @@ public class NodeController extends Controller {
 			process = processBuilder.start();
 			if (!process.waitFor(timeout, TimeUnit.SECONDS)) {
 				process.destroy();
-				logger.info("executeCommand("+ command + ", " + timeout + ") processs.exitValue=" + process.exitValue());
+				logger.info(
+						"executeCommand(" + command + ", " + timeout + ") processs.exitValue=" + process.exitValue());
 			}
 			output = (FileUtils.readFileToString(outputFile, "UTF8"));
 			error = (FileUtils.readFileToString(errorFile, "UTF8"));
@@ -434,7 +557,7 @@ public class NodeController extends Controller {
 				for (String s : stringArray) {
 					exit.error.add(s);
 				}
-			} 
+			}
 			if (output != null && !output.equals("")) {
 				string = output;
 				String[] stringArray = string.split("\n");
@@ -443,10 +566,10 @@ public class NodeController extends Controller {
 				}
 			}
 		} catch (Exception e) {
-			logger.error("executeCommand("+ command + ", " + timeout + ") Exception: " + e.getMessage());
-			throw new Exception("executeCommand("+ command + ", " + timeout + ") Exception: " + e.getMessage());
+			logger.error("executeCommand(" + command + ", " + timeout + ") Exception: " + e.getMessage());
+			throw new Exception("executeCommand(" + command + ", " + timeout + ") Exception: " + e.getMessage());
 		} finally {
-			//logger.debug("executeCommand(...) process.exitValue=" + process.exitValue());
+			// logger.debug("executeCommand(...) process.exitValue=" + process.exitValue());
 			exit.value = process.exitValue();
 		}
 		return exit;
@@ -487,6 +610,14 @@ public class NodeController extends Controller {
 		}
 		return directory.delete();
 	}
+	
+	public static boolean deleteFile(File file) {
+		if(file.exists()) {
+			file.delete();
+			return true;
+		}
+		return false;
+	}
 
 	public File[] getDirectoryFileArray(String directoryName) {
 		logger.info("getDirectoryFileArray(" + directoryName + ")");
@@ -509,7 +640,7 @@ public class NodeController extends Controller {
 	}
 
 	public static boolean newFile(File file) {
-		//logger.debug("newFile(" + file + ")");
+		// logger.debug("newFile(" + file + ")");
 		boolean success = false;
 		String newFileAbsolutePath = FilenameUtils.normalize(file.getAbsolutePath());
 		File newFile = new File(newFileAbsolutePath);
@@ -573,7 +704,7 @@ public class NodeController extends Controller {
 			AlgorithmParameters algorithmParameters = cipher.getParameters();
 			byte[] initializationVector = ((IvParameterSpec) algorithmParameters
 					.<IvParameterSpec>getParameterSpec(IvParameterSpec.class)).getIV();
-			logger.info(Integer.valueOf(initializationVector.length)+"");
+			logger.info(Integer.valueOf(initializationVector.length) + "");
 			byte[] cipherText = cipher.doFinal(byteArray);
 			encryptedByteArray = appendByteArrays(encryptedByteArray, salt);
 			encryptedByteArray = appendByteArrays(encryptedByteArray, initializationVector);
@@ -699,7 +830,7 @@ public class NodeController extends Controller {
 			combined[i] = (i < one.length) ? one[i] : two[i - one.length];
 		return combined;
 	}
-	
+
 	public static String getBufferedImageChecksum(BufferedImage bufferedImage) throws Exception {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		ImageIO.write(bufferedImage, "png", outputStream);
@@ -721,4 +852,28 @@ public class NodeController extends Controller {
 		return hexString;
 	}
 
+}
+
+//Source - https://stackoverflow.com/a/60683175
+//Posted by Michał Ziober
+//Retrieved 2026-06-12, License - CC BY-SA 4.0
+
+class ColorJsonSerializer extends JsonSerializer<Color> {
+
+	@Override
+	public void serialize(Color value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+		if (value == null) {
+			gen.writeNull();
+			return;
+		}
+		gen.writeNumber(value.getRGB());
+	}
+}
+
+class ColorJsonDeserializer extends JsonDeserializer<Color> {
+
+	@Override
+	public Color deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+		return new Color(p.getValueAsInt());
+	}
 }
