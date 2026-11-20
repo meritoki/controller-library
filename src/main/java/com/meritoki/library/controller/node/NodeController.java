@@ -38,6 +38,10 @@ import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -481,6 +485,23 @@ public class NodeController extends Controller {
 			e.printStackTrace();
 		}
 	}
+	
+    public static void copyResource(String resourcePath, String destinationPath) throws IOException {
+        // Do not include "src/main/resources" or a leading slash
+        try (InputStream in = NodeController.class.getClassLoader().getResourceAsStream(resourcePath)) {
+            if (in == null) {
+                throw new IllegalArgumentException("Resource not found: " + resourcePath);
+            }
+            Path target = Paths.get(destinationPath);
+            // Ensure parent directories exist
+            if (target.getParent() != null) {
+                Files.createDirectories(target.getParent());
+            }
+            
+            // Copy stream to target file, overwriting if it already exists
+            Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
 
 	@JsonIgnore
 	public static Exit executeCommand(String command) throws Exception {
